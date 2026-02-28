@@ -587,10 +587,7 @@ footer span{color:var(--azure)}
       </div>
 
       <!-- FORM — sends directly to Surajgazi363@gmail.com via Formspree -->
-      <form class="cf rev" id="contactForm" action="https://formspree.io/f/xpwzqdab" method="POST">
-        <input type="hidden" name="_replyto" value=""/>
-        <input type="hidden" name="_subject" value="🚀 Portfolio Contact – New Recruiter Message"/>
-        <input type="hidden" name="_to" value="Surajgazi363@gmail.com"/>
+      <form class="cf rev" id="contactForm">
         <div class="fr">
           <div class="fg2"><label><span class="fl">👤</span> Name</label><input type="text" name="name" placeholder="Your full name" required/></div>
           <div class="fg2"><label><span class="fl">📧</span> Email</label><input type="email" name="email" placeholder="your@company.com" required/></div>
@@ -606,7 +603,7 @@ footer span{color:var(--azure)}
           </select>
         </div>
         <div class="fg2"><label><span class="fl">✍️</span> Message</label><textarea name="message" placeholder="Tell me about the opportunity, project, or your question..." required></textarea></div>
-        <div class="msg-ok" id="msgOk">✅ Message sent! I'll respond to you within 24 hours.</div>
+        <div class="msg-ok" id="msgOk"></div>
         <div class="msg-err" id="msgErr">❌ Something went wrong. Please email me directly at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4a393f382b202d2b30237b7a7a0a2d272b232664292527">[email&#160;protected]</a></div>
         <div class="fsb"><button type="submit" class="bp" id="submitBtn">📨 Send Message</button></div>
         <p style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.5rem;font-family:'JetBrains Mono',monospace">Messages are forwarded directly to <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8cdff9feede6ebedf6e5bfbabfccebe1ede5e0a2efe3e1">[email&#160;protected]</a></p>
@@ -719,32 +716,56 @@ document.querySelectorAll('[data-count]').forEach(c=>cio.observe(c));
 window.addEventListener('scroll',()=>{document.getElementById('mn').style.height=window.scrollY>60?'56px':'64px';});
 
 /* ═══════════════════ CONTACT FORM (Formspree AJAX) ═══════════════════ */
-document.getElementById('contactForm').addEventListener('submit',async function(e){
+document.getElementById('contactForm').addEventListener('submit', function(e){
   e.preventDefault();
-  const btn=document.getElementById('submitBtn');
-  const ok=document.getElementById('msgOk');
-  const err=document.getElementById('msgErr');
-  btn.textContent='⏳ Sending...';
-  btn.disabled=true;
-  ok.classList.remove('show');
-  err.classList.remove('show');
-  try{
-    const fd=new FormData(this);
-    const res=await fetch(this.action,{method:'POST',body:fd,headers:{Accept:'application/json'}});
-    if(res.ok){
-      ok.classList.add('show');
-      btn.textContent='✅ Sent!';
-      btn.style.background='var(--ok)';
-      this.reset();
-      setTimeout(()=>{btn.textContent='📨 Send Message';btn.style.background='';btn.disabled=false;ok.classList.remove('show');},5000);
-    } else {
-      throw new Error('fail');
-    }
-  } catch(ex){
+  const btn = document.getElementById('submitBtn');
+  const ok  = document.getElementById('msgOk');
+  const err = document.getElementById('msgErr');
+
+  // Collect form values
+  const name    = document.querySelector('#contactForm input[name="name"]').value.trim();
+  const email   = document.querySelector('#contactForm input[name="email"]').value.trim();
+  const company = document.querySelector('#contactForm input[name="company"]').value.trim();
+  const inquiry = document.querySelector('#contactForm select[name="inquiry_type"]').value;
+  const message = document.querySelector('#contactForm textarea[name="message"]').value.trim();
+
+  // Validate
+  if(!name || !email || !message){
+    err.textContent = '⚠️ Please fill in Name, Email and Message.';
     err.classList.add('show');
-    btn.textContent='📨 Send Message';
-    btn.disabled=false;
+    return;
   }
+
+  // Build mailto link
+  const subject = encodeURIComponent('🚀 Portfolio Inquiry – ' + inquiry + ' | ' + name);
+  const body = encodeURIComponent(
+    'Hi Suraj,\n\n' +
+    'Name: ' + name + '\n' +
+    'Email: ' + email + '\n' +
+    (company ? 'Company: ' + company + '\n' : '') +
+    'Inquiry: ' + inquiry + '\n\n' +
+    'Message:\n' + message + '\n\n' +
+    '---\nSent from your Portfolio Website'
+  );
+
+  const mailtoLink = 'mailto:Surajgazi363@gmail.com?subject=' + subject + '&body=' + body;
+
+  // Open email client
+  window.location.href = mailtoLink;
+
+  // Show success
+  ok.textContent = '✅ Your email client is opening... Send the email to reach Suraj!';
+  ok.classList.add('show');
+  err.classList.remove('show');
+  btn.textContent = '✅ Opening Email...';
+  btn.style.background = 'var(--ok)';
+
+  setTimeout(() => {
+    btn.textContent = '📨 Send Message';
+    btn.style.background = '';
+    ok.classList.remove('show');
+    e.target.reset();
+  }, 5000);
 });
 </script>
 </body>
